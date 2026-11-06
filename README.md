@@ -113,7 +113,7 @@ npm run build
 
 ## 开源协议
 
-本项目采用 MIT 开源协议。
+本项目采用 [MIT 开源协议](LICENSE)。
 
 ## 致谢
 
