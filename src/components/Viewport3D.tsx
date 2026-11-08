@@ -182,7 +182,7 @@ function SceneContent() {
         <lineSegments geometry={rayBundle.lineGeometry}>
           <lineBasicMaterial
             ref={lineMaterialRef}
-            color="#fffbcc"
+            color="#001aff"
             transparent
             opacity={0.45}
             blending={THREE.AdditiveBlending}
