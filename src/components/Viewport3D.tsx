@@ -140,7 +140,7 @@ function SceneContent() {
   return (
     <>
       <color attach="background" args={['#01050a']} />
-      <fog attach="fog" args={['#01050a', 150, 350]} />
+      <fog attach="fog" args={['#01050a', 150, 1200]} />
 
       <ambientLight intensity={0.6} />
       <directionalLight position={[60, 45, 40]} intensity={1.2} color="#a8d8ff" />
@@ -221,7 +221,7 @@ export function Viewport3D() {
           alpha: false,
           powerPreference: 'high-performance',
         }}
-        camera={{ position: [0, 0, 800], fov: 22, near: 0.1, far: 800 }}
+        camera={{ position: [0, 0, 800], fov: 22, near: 0.1, far: 1200 }}
       >
         <SceneContent />
       </Canvas>

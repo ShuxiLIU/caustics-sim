@@ -57,38 +57,28 @@ export function ScreenCapture() {
     return intensity
   }, [phaseId, parameters, screenZ, screenSize, sampleCount])
 
-  const generateSVG = () => {
-    const pixelSize = screenSize / GRID_RESOLUTION
-    const pixels = []
+  const imageUrl = useMemo(() => {
+    const canvas = document.createElement('canvas')
+    canvas.width = GRID_RESOLUTION
+    canvas.height = GRID_RESOLUTION
+    const context = canvas.getContext('2d')
+    if (!context) return ''
 
+    const pixels = context.createImageData(GRID_RESOLUTION, GRID_RESOLUTION)
     for (let y = 0; y < GRID_RESOLUTION; y += 1) {
       for (let x = 0; x < GRID_RESOLUTION; x += 1) {
-        const intensity = intensityMap[y][x]
-        const normalizedIntensity = intensity / MAX_INTENSITY
-        const enhancedIntensity = Math.sqrt(normalizedIntensity) * 1.2
-        const clampedIntensity = Math.min(enhancedIntensity, 1)
-        const gray = Math.floor(clampedIntensity * 255)
-        const color = `rgb(${gray}, ${gray}, ${gray})`
-
-        pixels.push(
-          <rect
-            key={`${x}-${y}`}
-            x={x * pixelSize}
-            y={y * pixelSize}
-            width={pixelSize}
-            height={pixelSize}
-            fill={color}
-          />
-        )
+        const normalizedIntensity = intensityMap[y][x] / MAX_INTENSITY
+        const gray = Math.floor(Math.min(Math.sqrt(normalizedIntensity) * 1.2, 1) * 255)
+        const offset = (y * GRID_RESOLUTION + x) * 4
+        pixels.data[offset] = gray
+        pixels.data[offset + 1] = gray
+        pixels.data[offset + 2] = gray
+        pixels.data[offset + 3] = 255
       }
     }
-
-    return (
-      <svg viewBox={`0 0 ${screenSize} ${screenSize}`} preserveAspectRatio="none">
-        {pixels}
-      </svg>
-    )
-  }
+    context.putImageData(pixels, 0, 0)
+    return canvas.toDataURL('image/png')
+  }, [intensityMap])
 
   const handleDoubleClick = () => {
     setIsModalOpen(true)
@@ -96,39 +86,6 @@ export function ScreenCapture() {
 
   const handleCloseModal = () => {
     setIsModalOpen(false)
-  }
-
-  const generateModalContent = () => {
-    const pixelSize = screenSize / GRID_RESOLUTION
-    const pixels = []
-
-    for (let y = 0; y < GRID_RESOLUTION; y += 1) {
-      for (let x = 0; x < GRID_RESOLUTION; x += 1) {
-        const intensity = intensityMap[y][x]
-        const normalizedIntensity = intensity / MAX_INTENSITY
-        const enhancedIntensity = Math.sqrt(normalizedIntensity) * 1.2
-        const clampedIntensity = Math.min(enhancedIntensity, 1)
-        const gray = Math.floor(clampedIntensity * 255)
-        const color = `rgb(${gray}, ${gray}, ${gray})`
-
-        pixels.push(
-          <rect
-            key={`${x}-${y}`}
-            x={x * pixelSize}
-            y={y * pixelSize}
-            width={pixelSize}
-            height={pixelSize}
-            fill={color}
-          />
-        )
-      }
-    }
-
-    return (
-      <svg width={1200} height={1200} viewBox={`0 0 ${screenSize} ${screenSize}`}>
-        {pixels}
-      </svg>
-    )
   }
 
   return (
@@ -141,7 +98,9 @@ export function ScreenCapture() {
 
       <div className="phase-map-container">
         <div className="screen-capture-image" onDoubleClick={handleDoubleClick}>
-          {generateSVG()}
+          <svg viewBox={`0 0 ${screenSize} ${screenSize}`} preserveAspectRatio="none">
+            <image href={imageUrl} width={screenSize} height={screenSize} style={{ imageRendering: 'pixelated' }} />
+          </svg>
         </div>
         <div className="phase-map-colorbar">
           <svg viewBox="0 0 20 200" preserveAspectRatio="none">
@@ -157,7 +116,11 @@ export function ScreenCapture() {
       </div>
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-        {generateModalContent()}
+        {isModalOpen && (
+          <svg width={1200} height={1200} viewBox={`0 0 ${screenSize} ${screenSize}`}>
+            <image href={imageUrl} width={screenSize} height={screenSize} style={{ imageRendering: 'pixelated' }} />
+          </svg>
+        )}
       </Modal>
     </div>
   )
